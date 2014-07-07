@@ -1,4 +1,18 @@
 /* 
+ * H.264 分析器
+ * H.264 Analysis
+ *
+ * 雷霄骅 Lei Xiaohua
+ * leixiaohua1020@126.com
+ * 中国传媒大学/数字电视技术
+ * Communication University of China / Digital TV Technology
+ * http://blog.csdn.net/leixiaohua1020
+ * 
+ * H.264码流分析工具
+ * H.264 Stream Analysis Tools
+ *
+ */
+/* 
  * h264bitstream - a library for reading and writing H.264 video
  * Copyright (C) 2005-2007 Auroras Entertainment, LLC
  * 
@@ -204,11 +218,9 @@ char tempstr[1000]={0};
 //char* outputstr=(char *)malloc(100000);
 char outputstr[100000]={'\0'};
 //自己写的，解析NAL数据的函数
-int probe_nal_unit(char* filename,int data_offset,int data_lenth,LPVOID lparam){
+char* probe_nal_unit(char* filename,int data_offset,int data_lenth){
 	//清空字符串-----------------
 	memset(outputstr,'\0',100000);
-	//句柄
-	CSpecialVH264Dlg *dlg=(CSpecialVH264Dlg *)lparam;
 	//tempstr=(char *)malloc(10000);
 	//outputstr=(char *)malloc(100000);
 	//内存用于存放NAL（包含起始码）
@@ -223,8 +235,7 @@ int probe_nal_unit(char* filename,int data_offset,int data_lenth,LPVOID lparam){
 	find_nal_unit(nal_temp, data_lenth, &nal_start, &nal_end);
 	read_nal_unit(h, &nal_temp[nal_start], nal_end - nal_start);
 	debug_nal(h,h->nal);
-	dlg->m_vh264nalinfo.SetWindowText(outputstr);
 	free(nal_temp);
 	fclose(fp);
-	return 0;
+	return outputstr;
 }

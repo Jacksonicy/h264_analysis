@@ -1,10 +1,16 @@
-
-// SpecialVH264.h : PROJECT_NAME 应用程序的主头文件
-//
-/*
- * 作者：雷霄骅
- * 中国传媒大学|信息工程学院|数字电视技术
- * 版权所有
+/* 
+ * H.264 分析器
+ * H.264 Analysis
+ *
+ * 雷霄骅 Lei Xiaohua
+ * leixiaohua1020@126.com
+ * 中国传媒大学/数字电视技术
+ * Communication University of China / Digital TV Technology
+ * http://blog.csdn.net/leixiaohua1020
+ * 
+ * H.264码流分析工具
+ * H.264 Stream Analysis Tools
+ *
  */
 #pragma once
 
@@ -27,7 +33,8 @@ public:
 // 重写
 public:
 	virtual BOOL InitInstance();
-
+	//加载语言配置
+	void LoadLaguage();
 // 实现
 
 	DECLARE_MESSAGE_MAP()

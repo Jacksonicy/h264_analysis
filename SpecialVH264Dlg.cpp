@@ -1,13 +1,16 @@
-
 /* 
- *H.264 视频专用分析
- *H.264 Stream Analysis
+ * H.264 分析器
+ * H.264 Analysis
  *
- *雷霄骅 Lei Xiaohua
- *leixiaohua1020@126.com
- *中国传媒大学/数字电视技术
- *Communication University of China / Digital TV Technology
- *http://blog.csdn.net/leixiaohua1020
+ * 雷霄骅 Lei Xiaohua
+ * leixiaohua1020@126.com
+ * 中国传媒大学/数字电视技术
+ * Communication University of China / Digital TV Technology
+ * http://blog.csdn.net/leixiaohua1020
+ * 
+ * H.264码流分析工具
+ * H.264 Stream Analysis Tools
+ *
  */
 #include "stdafx.h"
 #include "SpecialVH264.h"
@@ -70,6 +73,7 @@ void CSpecialVH264Dlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_V_H264_NALINFO, m_vh264nalinfo);
 	//  DDX_Control(pDX, IDC_V_H264_OUTPUTINFO, m_vh264outputinfo);
 	//  DDX_Control(pDX, IDC_V_H264_METHOD, m_vh264method);
+	DDX_Control(pDX, IDC_V_H264_LANG, m_vh264lang);
 }
 
 BEGIN_MESSAGE_MAP(CSpecialVH264Dlg, CDialogEx)
@@ -81,6 +85,8 @@ BEGIN_MESSAGE_MAP(CSpecialVH264Dlg, CDialogEx)
 	ON_BN_CLICKED(IDC_V_H264_ABOUT, &CSpecialVH264Dlg::OnBnClickedVH264About)
 ON_NOTIFY(LVN_ITEMACTIVATE, IDC_V_H264_NALLIST, &CSpecialVH264Dlg::OnItemactivateVH264Nallist)
 ON_WM_DROPFILES()
+ON_NOTIFY(LVN_ITEMCHANGED, IDC_V_H264_NALLIST, &CSpecialVH264Dlg::OnItemchangedVH264Nallist)
+ON_CBN_SELCHANGE(IDC_V_H264_LANG, &CSpecialVH264Dlg::OnSelchangeVH264Lang)
 END_MESSAGE_MAP()
 
 
@@ -116,17 +122,17 @@ BOOL CSpecialVH264Dlg::OnInitDialog()
 	m_vh264nallist.ModifyStyle(0,LVS_SINGLESEL|LVS_REPORT|LVS_SHOWSELALWAYS);
 	m_vh264nallist.SetExtendedStyle(dwExStyle);
 
-	m_vh264nallist.InsertColumn(0,"Number",LVCFMT_CENTER,50,0);
-	m_vh264nallist.InsertColumn(1,"nal_reference_idc",LVCFMT_CENTER,100,0);
-	m_vh264nallist.InsertColumn(2,"NAL Type(nal_unit_type)",LVCFMT_CENTER,100,0);
-	m_vh264nallist.InsertColumn(3,"NAL Size(len)",LVCFMT_CENTER,100,0);
+	m_vh264nallist.InsertColumn(0,_T("Number"),LVCFMT_CENTER,50,0);
+	m_vh264nallist.InsertColumn(1,_T("nal_reference_idc"),LVCFMT_CENTER,100,0);
+	m_vh264nallist.InsertColumn(2,_T("NAL Type(nal_unit_type)"),LVCFMT_CENTER,100,0);
+	m_vh264nallist.InsertColumn(3,_T("NAL Size(len)"),LVCFMT_CENTER,100,0);
 	//---------------------
 	m_vh264nallistmaxnum.SetCheck(1);
 	nl_index=0;
 	//------------
 	m_vh264inputurl.EnableFileBrowseButton(
 		NULL,
-		"H.264 Files (*.264,*.h264)|*.264;*.h264|All Files (*.*)|*.*||"
+		_T("H.264 Files (*.264,*.h264)|*.264;*.h264|All Files (*.*)|*.*||")
 		);
 	// 设置此对话框的图标。当应用程序主窗口不是对话框时，框架将自动
 	//  执行此操作
@@ -134,6 +140,10 @@ BOOL CSpecialVH264Dlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	m_vh264lang.InsertString(0,_T("Chinese"));
+	m_vh264lang.InsertString(1,_T("English"));
+
+
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -200,7 +210,13 @@ void CSpecialVH264Dlg::OnBnClickedVH264InputurlOpen()
 		AfxMessageBox(text);
 		return;
 	}
+
+#ifdef _UNICODE
+	USES_CONVERSION;
+	strcpy(fileurl,W2A(strFilePath));
+#else
 	strcpy(fileurl,strFilePath);
+#endif
 	h264_nal_parse(this,fileurl);
 }
 
@@ -216,25 +232,25 @@ int CSpecialVH264Dlg::AppendNLInfo(int nal_reference_idc,int nal_unit_type,int l
 	CString temp_index,temp_nal_reference_idc,temp_nal_unit_type,temp_len;
 	int nIndex=0;
 	switch(nal_unit_type){
-	case 1:temp_nal_unit_type.Format("SLICE");break;
-	case 2:temp_nal_unit_type.Format("DPA");break;
-	case 3:temp_nal_unit_type.Format("DPB");break;
-	case 4:temp_nal_unit_type.Format("DPC");break;
-	case 5:temp_nal_unit_type.Format("IDR_SLICE");break;
-	case 6:temp_nal_unit_type.Format("SEI");break;
-	case 7:temp_nal_unit_type.Format("SPS");break;
-	case 8:temp_nal_unit_type.Format("PPS");break;
-	case 9:temp_nal_unit_type.Format("AUD");break;
-	case 10:temp_nal_unit_type.Format("END_SEQUENCE");break;
-	case 11:temp_nal_unit_type.Format("END_STREAM");break;
-	case 12:temp_nal_unit_type.Format("FILLER_DATA");break;
-	case 13:temp_nal_unit_type.Format("SPS_EXT");break;
-	case 19:temp_nal_unit_type.Format("AUXILIARY_SLICE");break;
-	default:temp_nal_unit_type.Format("其他");break;
+	case 1:temp_nal_unit_type.Format(_T("SLICE"));break;
+	case 2:temp_nal_unit_type.Format(_T("DPA"));break;
+	case 3:temp_nal_unit_type.Format(_T("DPB"));break;
+	case 4:temp_nal_unit_type.Format(_T("DPC"));break;
+	case 5:temp_nal_unit_type.Format(_T("IDR_SLICE"));break;
+	case 6:temp_nal_unit_type.Format(_T("SEI"));break;
+	case 7:temp_nal_unit_type.Format(_T("SPS"));break;
+	case 8:temp_nal_unit_type.Format(_T("PPS"));break;
+	case 9:temp_nal_unit_type.Format(_T("AUD"));break;
+	case 10:temp_nal_unit_type.Format(_T("END_SEQUENCE"));break;
+	case 11:temp_nal_unit_type.Format(_T("END_STREAM"));break;
+	case 12:temp_nal_unit_type.Format(_T("FILLER_DATA"));break;
+	case 13:temp_nal_unit_type.Format(_T("SPS_EXT"));break;
+	case 19:temp_nal_unit_type.Format(_T("AUXILIARY_SLICE"));break;
+	default:temp_nal_unit_type.Format(_T("其他"));break;
 	}
-	temp_index.Format("%d",nl_index);
-	temp_nal_reference_idc.Format("%d",nal_reference_idc);
-	temp_len.Format("%d",len);
+	temp_index.Format(_T("%d"),nl_index);
+	temp_nal_reference_idc.Format(_T("%d"),nal_reference_idc);
+	temp_len.Format(_T("%d"),len);
 	//获取当前记录条数
 	nIndex=m_vh264nallist.GetItemCount();
 	//“行”数据结构
@@ -244,7 +260,7 @@ int CSpecialVH264Dlg::AppendNLInfo(int nal_reference_idc,int nal_unit_type,int l
 	lvitem.iSubItem=0;
 	//注：vframe_index不可以直接赋值！
 	//务必使用f_index执行Format!再赋值！
-	lvitem.pszText=(char *)(LPCTSTR)temp_index;
+	lvitem.pszText=temp_index.GetBuffer();
 	//------------------------
 	//这个vector记录了nal的位置信息
 	//使用它我们可以获取到NAL的详细信息
@@ -300,21 +316,21 @@ void CSpecialVH264Dlg::OnCustomdrawMyList ( NMHDR* pNMHDR, LRESULT* pResult )
 		int    nItem = static_cast<int>( pLVCD->nmcd.dwItemSpec );
 
 		CString strTemp = m_vh264nallist.GetItemText(nItem,2);
-		if(strcmp(strTemp,"SLICE")==0){
+		if(strTemp.Compare(_T("SLICE"))==0){
 			clrNewTextColor = RGB(0,0,0);		//Set the text 
 			clrNewBkColor = RGB(0,255,255);		//青色
 		}
-		else if(strcmp(strTemp,"SPS")==0){
+		else if(strTemp.Compare(_T("SPS"))==0){
 			clrNewTextColor = RGB(0,0,0);		//text 
 			clrNewBkColor = RGB(255,255,0);		//黄色
 		}
-		else if(strcmp(strTemp,"PPS")==0){
+		else if(strTemp.Compare(_T("PPS"))==0){
 			clrNewTextColor = RGB(0,0,0);		//text
 			clrNewBkColor = RGB(255,153,0);		//咖啡色
-		}else if(strcmp(strTemp,"SEI")==0){
+		}else if(strTemp.Compare(_T("SEI"))==0){
 			clrNewTextColor = RGB(0,0,0);		//text
 			clrNewBkColor = RGB(255,66,255);			//粉红色
-		}else if(strcmp(strTemp,"IDR_SLICE")==0){
+		}else if(strTemp.Compare(_T("IDR_SLICE"))==0){
 			clrNewTextColor = RGB(0,0,0);		//text
 			clrNewBkColor = RGB(255,0,0);			//红色
 		}else{
@@ -353,7 +369,16 @@ void CSpecialVH264Dlg::OnItemactivateVH264Nallist(NMHDR *pNMHDR, LRESULT *pResul
 	int data_offset,data_lenth;
 	data_offset=nl_infovector[nIndex].data_offset;
 	data_lenth=nl_infovector[nIndex].data_lenth;
-	probe_nal_unit(fileurl,data_offset,data_lenth,this);
+	char *outputstr=probe_nal_unit(fileurl,data_offset,data_lenth);
+	CString outputstr1;
+#ifdef _UNICODE
+	USES_CONVERSION;
+	outputstr1.Format(_T("%s"),A2W(outputstr));
+#else
+	outputstr1.Format(_T("%s"),outputstr);
+#endif
+
+	m_vh264nalinfo.SetWindowText(outputstr1);
 	//----------------------
 	//获得选中行的序号
 	//CString str;
@@ -368,9 +393,63 @@ void CSpecialVH264Dlg::OnDropFiles(HDROP hDropInfo)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	CDialogEx::OnDropFiles(hDropInfo);
-	char* pFilePathName =(char *)malloc(MAX_URL_LENGTH);
+	LPTSTR pFilePathName =(LPTSTR)malloc(MAX_URL_LENGTH);
 	::DragQueryFile(hDropInfo, 0, pFilePathName,MAX_URL_LENGTH);  // 获取拖放文件的完整文件名，最关键！
-	m_vh264inputurl.SetWindowTextA(pFilePathName);
+	m_vh264inputurl.SetWindowText(pFilePathName);
 	::DragFinish(hDropInfo);   // 注意这个不能少，它用于释放Windows 为处理文件拖放而分配的内存
 	free(pFilePathName);
+}
+
+
+void CSpecialVH264Dlg::OnItemchangedVH264Nallist(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	POSITION ps;
+	int nIndex;
+
+	ps=m_vh264nallist.GetFirstSelectedItemPosition();
+	nIndex=m_vh264nallist.GetNextSelectedItem(ps);
+	//----------------------
+	int data_offset,data_lenth;
+	data_offset=nl_infovector[nIndex].data_offset;
+	data_lenth=nl_infovector[nIndex].data_lenth;
+	char *outputstr=probe_nal_unit(fileurl,data_offset,data_lenth);
+	CString outputstr1;
+#ifdef _UNICODE
+	USES_CONVERSION;
+	outputstr1.Format(_T("%s"),A2W(outputstr));
+#else
+	outputstr1.Format(_T("%s"),outputstr);
+#endif
+
+	m_vh264nalinfo.SetWindowText(outputstr1);
+
+	*pResult = 0;
+}
+
+
+void CSpecialVH264Dlg::OnSelchangeVH264Lang()
+{
+	//配置文件路径
+	char conf_path[300]={0};
+	//获得exe绝对路径
+	GetModuleFileNameA(NULL,(LPSTR)conf_path,300);//
+	//获得exe文家夹路径
+	strrchr( conf_path, '\\')[0]= '\0';//
+	//_getcwd(realpath,MYSQL_S_LENGTH);
+	printf("%s",conf_path);
+	strcat(conf_path,"\\configure.ini");
+	//写入配置文件
+	switch(m_vh264lang.GetCurSel()){
+	case 0:WritePrivateProfileStringA("Settings","language","Chinese",conf_path);break;
+	case 1:WritePrivateProfileStringA("Settings","language","English",conf_path);break;
+	default:break;
+	}
+	//重启软件
+	char exe_path[300]={0};
+	//获得exe绝对路径
+	GetModuleFileNameA(NULL,(LPSTR)exe_path,300);
+	ShellExecuteA( NULL,"open",exe_path,NULL,NULL,SW_SHOWNORMAL);
+	exit(0);
 }

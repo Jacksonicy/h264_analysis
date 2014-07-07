@@ -57,4 +57,4 @@
 
 
 //URL³¤¶È
-#define MAX_URL_LENGTH 2000
+#define MAX_URL_LENGTH 500

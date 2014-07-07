@@ -1,12 +1,16 @@
 /* 
- *H.264 视频专用分析
- *H.264 Stream Analysis
+ * H.264 分析器
+ * H.264 Analysis
  *
- *雷霄骅 Lei Xiaohua
- *leixiaohua1020@126.com
- *中国传媒大学/数字电视技术
- *Communication University of China / Digital TV Technology
- *http://blog.csdn.net/leixiaohua1020
+ * 雷霄骅 Lei Xiaohua
+ * leixiaohua1020@126.com
+ * 中国传媒大学/数字电视技术
+ * Communication University of China / Digital TV Technology
+ * http://blog.csdn.net/leixiaohua1020
+ * 
+ * H.264码流分析工具
+ * H.264 Stream Analysis Tools
+ *
  */
 #pragma once
 #include "resource.h"
@@ -63,4 +67,7 @@ public:
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 
 	CString text;
+	afx_msg void OnItemchangedVH264Nallist(NMHDR *pNMHDR, LRESULT *pResult);
+	CComboBox m_vh264lang;
+	afx_msg void OnSelchangeVH264Lang();
 };

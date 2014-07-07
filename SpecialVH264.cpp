@@ -1,14 +1,21 @@
-
-// SpecialVH264.cpp : 定义应用程序的类行为。
-//
-/*
- * 作者：雷霄骅
- * 中国传媒大学|信息工程学院|数字电视技术
- * 版权所有
+/* 
+ * H.264 分析器
+ * H.264 Analysis
+ *
+ * 雷霄骅 Lei Xiaohua
+ * leixiaohua1020@126.com
+ * 中国传媒大学/数字电视技术
+ * Communication University of China / Digital TV Technology
+ * http://blog.csdn.net/leixiaohua1020
+ * 
+ * H.264码流分析工具
+ * H.264 Stream Analysis Tools
+ *
  */
 #include "stdafx.h"
 #include "SpecialVH264.h"
 #include "SpecialVH264Dlg.h"
+#include <io.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -73,6 +80,8 @@ BOOL CSpecialVH264App::InitInstance()
 
 	//多国语言设置
 	//SetThreadUILanguage(MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT));
+	LoadLaguage();
+
 
 	CSpecialVH264Dlg dlg;
 	m_pMainWnd = &dlg;
@@ -99,3 +108,29 @@ BOOL CSpecialVH264App::InitInstance()
 	return FALSE;
 }
 
+void CSpecialVH264App::LoadLaguage()
+{
+	//配置文件路径
+	char conf_path[300]={0};
+	//获得exe绝对路径
+	GetModuleFileNameA(NULL,(LPSTR)conf_path,300);//
+	//获得exe文家夹路径
+	strrchr( conf_path, '\\')[0]= '\0';//
+	printf("%s",conf_path);
+	strcat(conf_path,"\\configure.ini");
+	//存储属性的字符串
+	char conf_val[300]={0};
+
+	if((_access(conf_path, 0 )) == -1 ){  
+		//配置文件不存在，直接返回
+		return;
+	}else{
+		GetPrivateProfileStringA("Settings","language",NULL,conf_val,300,conf_path);
+		if(strcmp(conf_val,"Chinese")==0){
+			SetThreadUILanguage(MAKELCID(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED), SORT_DEFAULT));
+		}else if(strcmp(conf_val,"English")==0){
+			SetThreadUILanguage(MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT));
+		}
+		return;
+	}
+}
