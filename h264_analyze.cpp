@@ -237,5 +237,7 @@ char* probe_nal_unit(char* filename,int data_offset,int data_lenth){
 	debug_nal(h,h->nal);
 	free(nal_temp);
 	fclose(fp);
+	h264_free(h);
+
 	return outputstr;
 }

@@ -83,10 +83,9 @@ BEGIN_MESSAGE_MAP(CSpecialVH264Dlg, CDialogEx)
 	ON_BN_CLICKED(IDC_V_H264_INPUTURL_OPEN, &CSpecialVH264Dlg::OnBnClickedVH264InputurlOpen)
 	ON_NOTIFY ( NM_CUSTOMDRAW,IDC_V_H264_NALLIST, OnCustomdrawMyList )
 	ON_BN_CLICKED(IDC_V_H264_ABOUT, &CSpecialVH264Dlg::OnBnClickedVH264About)
-ON_NOTIFY(LVN_ITEMACTIVATE, IDC_V_H264_NALLIST, &CSpecialVH264Dlg::OnItemactivateVH264Nallist)
 ON_WM_DROPFILES()
-ON_NOTIFY(LVN_ITEMCHANGED, IDC_V_H264_NALLIST, &CSpecialVH264Dlg::OnItemchangedVH264Nallist)
 ON_CBN_SELCHANGE(IDC_V_H264_LANG, &CSpecialVH264Dlg::OnSelchangeVH264Lang)
+ON_NOTIFY(LVN_ITEMCHANGED, IDC_V_H264_NALLIST, &CSpecialVH264Dlg::OnItemchangedVH264Nallist)
 END_MESSAGE_MAP()
 
 
@@ -143,7 +142,7 @@ BOOL CSpecialVH264Dlg::OnInitDialog()
 	m_vh264lang.InsertString(0,_T("Chinese"));
 	m_vh264lang.InsertString(1,_T("English"));
 
-
+	//_CrtSetBreakAlloc(5819);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -356,39 +355,6 @@ void CSpecialVH264Dlg::OnBnClickedVH264About()
 }
 
 
-void CSpecialVH264Dlg::OnItemactivateVH264Nallist(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMITEMACTIVATE pNMIA = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
-	//----------------------
-	POSITION ps;
-	int nIndex;
-
-	ps=m_vh264nallist.GetFirstSelectedItemPosition();
-	nIndex=m_vh264nallist.GetNextSelectedItem(ps);
-	//----------------------
-	int data_offset,data_lenth;
-	data_offset=nl_infovector[nIndex].data_offset;
-	data_lenth=nl_infovector[nIndex].data_lenth;
-	char *outputstr=probe_nal_unit(fileurl,data_offset,data_lenth);
-	CString outputstr1;
-#ifdef _UNICODE
-	USES_CONVERSION;
-	outputstr1.Format(_T("%s"),A2W(outputstr));
-#else
-	outputstr1.Format(_T("%s"),outputstr);
-#endif
-
-	m_vh264nalinfo.SetWindowText(outputstr1);
-	//----------------------
-	//获得选中行的序号
-	//CString str;
-	//str=m_vh264nallist.GetItemText(nIndex,0);
-	//AfxMessageBox(str);
-	//----------------------
-	*pResult = 0;
-}
-
-
 void CSpecialVH264Dlg::OnDropFiles(HDROP hDropInfo)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
@@ -398,34 +364,6 @@ void CSpecialVH264Dlg::OnDropFiles(HDROP hDropInfo)
 	m_vh264inputurl.SetWindowText(pFilePathName);
 	::DragFinish(hDropInfo);   // 注意这个不能少，它用于释放Windows 为处理文件拖放而分配的内存
 	free(pFilePathName);
-}
-
-
-void CSpecialVH264Dlg::OnItemchangedVH264Nallist(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-	// TODO: 在此添加控件通知处理程序代码
-	POSITION ps;
-	int nIndex;
-
-	ps=m_vh264nallist.GetFirstSelectedItemPosition();
-	nIndex=m_vh264nallist.GetNextSelectedItem(ps);
-	//----------------------
-	int data_offset,data_lenth;
-	data_offset=nl_infovector[nIndex].data_offset;
-	data_lenth=nl_infovector[nIndex].data_lenth;
-	char *outputstr=probe_nal_unit(fileurl,data_offset,data_lenth);
-	CString outputstr1;
-#ifdef _UNICODE
-	USES_CONVERSION;
-	outputstr1.Format(_T("%s"),A2W(outputstr));
-#else
-	outputstr1.Format(_T("%s"),outputstr);
-#endif
-
-	m_vh264nalinfo.SetWindowText(outputstr1);
-
-	*pResult = 0;
 }
 
 
@@ -451,5 +389,36 @@ void CSpecialVH264Dlg::OnSelchangeVH264Lang()
 	//获得exe绝对路径
 	GetModuleFileNameA(NULL,(LPSTR)exe_path,300);
 	ShellExecuteA( NULL,"open",exe_path,NULL,NULL,SW_SHOWNORMAL);
-	exit(0);
+	OnCancel();
+}
+
+
+void CSpecialVH264Dlg::OnItemchangedVH264Nallist(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	 //TODO: 在此添加控件通知处理程序代码
+	POSITION ps;
+	int nIndex;
+	
+	ps=m_vh264nallist.GetFirstSelectedItemPosition();
+	nIndex=m_vh264nallist.GetNextSelectedItem(ps);
+	if(nIndex>=0){
+	//----------------------
+	int data_offset,data_lenth;
+	data_offset=nl_infovector[nIndex].data_offset;
+	data_lenth=nl_infovector[nIndex].data_lenth;
+	char *outputstr=probe_nal_unit(fileurl,data_offset,data_lenth);
+	CString outputstr1;
+#ifdef _UNICODE
+	USES_CONVERSION;
+	outputstr1.Format(_T("%s"),A2W(outputstr));
+#else
+	outputstr1.Format(_T("%s"),outputstr);
+#endif
+	
+	m_vh264nalinfo.SetWindowText(outputstr1);
+}
+
+
+	*pResult = 0;
 }

@@ -55,19 +55,17 @@ public:
 	void SystemClear();
 	afx_msg void OnBnClickedVH264About();
 	CEdit m_vh264nalinfo;
-//	CButton m_vh264outputinfo;
 	//Ò»ÌõPacket¼ÇÂ¼
 	typedef struct NALInfo{
 		int data_offset;
 		int data_lenth;
 	}NALInfo;
 	vector<NALInfo> nl_infovector;
-	afx_msg void OnItemactivateVH264Nallist(NMHDR *pNMHDR, LRESULT *pResult);
 	//-----
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 
 	CString text;
-	afx_msg void OnItemchangedVH264Nallist(NMHDR *pNMHDR, LRESULT *pResult);
 	CComboBox m_vh264lang;
 	afx_msg void OnSelchangeVH264Lang();
+	afx_msg void OnItemchangedVH264Nallist(NMHDR *pNMHDR, LRESULT *pResult);
 };
