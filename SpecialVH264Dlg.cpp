@@ -71,8 +71,6 @@ void CSpecialVH264Dlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_V_H264_NALLIST, m_vh264nallist);
 	DDX_Control(pDX, IDC_V_H264_NALLIST_MAXNUM, m_vh264nallistmaxnum);
 	DDX_Control(pDX, IDC_V_H264_NALINFO, m_vh264nalinfo);
-	//  DDX_Control(pDX, IDC_V_H264_OUTPUTINFO, m_vh264outputinfo);
-	//  DDX_Control(pDX, IDC_V_H264_METHOD, m_vh264method);
 	DDX_Control(pDX, IDC_V_H264_LANG, m_vh264lang);
 }
 
